@@ -1,41 +1,32 @@
 <template>
-  <v-container class="fill-height" fluid>
-    <v-row align="center" justify="center">
-      <v-col cols="12" sm="8" md="4">
-        <v-card class="elevation-12">
-          <v-toolbar color="primary" dark flat>
-            <v-toolbar-title>Login form</v-toolbar-title>
-            <v-spacer></v-spacer>
-          </v-toolbar>
-          <v-card-text>
-            <v-form>
-              <v-text-field
-                label="Login"
-                name="login"
-                prepend-icon="mdi-account"
-                type="text"
-                v-model="email"
-              ></v-text-field>
-
-              <v-text-field
-                id="password"
-                v-model="password"
-                label="Password"
-                name="password"
-                prepend-icon="mdi-lock"
-                type="password"
-              ></v-text-field>
-            </v-form>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" @click="login">Login</v-btn>
-          </v-card-actions>
-        </v-card>
-        <v-alert type="error" v-if="feedback">{{feedback}}</v-alert>
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-card width="400" class="mx-auto mt-5">
+    <v-card-title class="display-1">Login</v-card-title>
+    <v-card-text>
+      <v-form ref="form" v-model="valid" lazy-validation>
+        <v-text-field
+          label="Email"
+          prepend-icon="mdi-account-circle"
+          v-model="email"
+          :rules="emailRules"
+          required
+        ></v-text-field>
+        <v-text-field
+          :type="showPassword ? 'text' : 'password'"
+          label="Password"
+          prepend-icon="mdi-lock"
+          append-icon="mdi-eye-off"
+          @click:append="showPassword = !showPassword"
+          v-model="password"
+          :rules="passwordRules"
+        ></v-text-field>
+      </v-form>
+    </v-card-text>
+    <v-divider></v-divider>
+    <v-card-actions>
+      <v-btn color="success" :disabled="!valid" @click="login">Login</v-btn>
+    </v-card-actions>
+    <v-alert type="error" v-if="feedback">{{feedback}}</v-alert>
+  </v-card>
 </template>
 
 <script>
@@ -45,9 +36,16 @@ export default {
 
   data() {
     return {
+      showPassword: false,
       email: null,
-      password: null,
+      password: "",
       feedback: null,
+      valid: true,
+      passwordRules: [(v) => v.length >= 8 || "Min 8 characters"],
+      emailRules: [
+        (v) => !!v || "E-mail is required",
+        (v) => /.+@.+\..+/.test(v) || "E-mail must be valid",
+      ],
     };
   },
   methods: {

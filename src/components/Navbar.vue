@@ -9,6 +9,7 @@
       </router-link>
 
       <v-spacer></v-spacer>
+      <div v-if="user" class="grey--text text-darken-1">{{user.email}}</div>
       <v-btn text v-if="!user">
         <router-link :to="{name:'signup'}">
           <span>Sign Up</span>

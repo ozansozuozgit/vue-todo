@@ -77,7 +77,6 @@ export default {
     tasks: [],
     task: null,
     user: null,
-    doc_id: null,
   }),
   computed: {
     completedTasks() {
