@@ -106,20 +106,18 @@ export default {
       this.task = null;
     },
     removeFromList(task_id) {
-      //  this.tasks = this.tasks.filter((task) => {
-      //             return task.id !== task.id;
       this.tasks = this.tasks.filter((task) => {
         return task.id !== task_id;
       });
     },
 
     update(task) {
-      console.log(task.id);
       db.collection("users")
         .doc(this.user.email)
         .collection(`todos`)
         .doc(task.id)
         .update({ done: task.done });
+      this.tasks.sort((x, y) => x.done - y.done).reverse();
     },
     deleteTodo(task) {
       db.collection("users")
@@ -135,6 +133,7 @@ export default {
       db.collection("users")
         .doc(this.user.email)
         .collection("todos")
+        .orderBy("done", "desc")
         .get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
