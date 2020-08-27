@@ -1,13 +1,10 @@
 <template>
   <nav>
     <v-toolbar>
-      <router-link :to="{name:'home'}">
-        <v-toolbar-title class="grey--text">
-          <span class="font-weight-light">Todo</span>
-          <span>List</span>
-        </v-toolbar-title>
-      </router-link>
-
+      <v-toolbar-title class="grey--text">
+        <span class="font-weight-light">Todo</span>
+        <span>List</span>
+      </v-toolbar-title>
       <v-spacer></v-spacer>
       <div v-if="user" class="grey--text text-darken-1">{{user.email}}</div>
       <v-btn text v-if="!user">
@@ -49,7 +46,6 @@ export default {
   },
   created() {
     firebase.auth().onAuthStateChanged((user) => {
-      //   console.log(user);
       if (user) {
         this.user = user;
       } else {

@@ -1,11 +1,16 @@
 <template
   >
   <v-container style="max-width: 500px">
-    <v-text-field v-model="task" label="What are you working on?" solo @keydown.enter="create">
-      <v-fade-transition v-slot:append>
-        <v-icon v-if="task" @click="create">add_circle</v-icon>
-      </v-fade-transition>
-    </v-text-field>
+    <v-row>
+      <v-text-field v-model="task" label="What are you working on?" solo @keydown.enter="create">
+        <v-fade-transition v-slot:append>
+          <v-icon @click="create">add_circle</v-icon>
+        </v-fade-transition>
+      </v-text-field>
+      <v-btn class="mt-1 ml-1" fab dark small color="primary" @click="create">
+        <v-icon dark>mdi-plus</v-icon>
+      </v-btn>
+    </v-row>
 
     <h2 class="display-1 success--text pl-4">
       Tasks:&nbsp;
@@ -29,7 +34,9 @@
     </v-row>
 
     <v-divider class="mb-4"></v-divider>
-
+    <div class="text-center" v-if="!tasks.length">
+      <v-progress-circular :size="50" color="amber" indeterminate></v-progress-circular>
+    </div>
     <v-card v-if="tasks.length > 0">
       <v-slide-y-transition class="py-0" group tag="v-list">
         <template v-for="(task, i) in tasks">
@@ -75,7 +82,7 @@ export default {
 
   data: () => ({
     tasks: [],
-    task: null,
+    task: "",
     user: null,
   }),
   computed: {
@@ -92,18 +99,26 @@ export default {
 
   methods: {
     create() {
-      db.collection("users")
-        .doc(this.user.email)
-        .collection("todos")
-        .add({ done: false, text: this.task })
-        .then((doc) => {
-          this.addToList(doc.id);
-        });
+      if (this.task !== "") {
+        this.tasks.push({ done: false, text: this.task });
+
+        db.collection("users")
+          .doc(this.user.email)
+          .collection("todos")
+          .add({ done: false, text: this.task })
+          .then((doc) => {
+            this.addToList(doc.id);
+          });
+      }
     },
     addToList(doc_id) {
-      this.tasks.push({ done: false, text: this.task, id: doc_id });
-      this.task = null;
+      this.tasks[this.tasks.length - 1] = {
+        ...this.tasks[this.tasks.length - 1],
+        id: doc_id,
+      };
+      this.task = "";
     },
+
     removeFromList(task_id) {
       this.tasks = this.tasks.filter((task) => {
         return task.id !== task_id;
@@ -111,24 +126,25 @@ export default {
     },
 
     update(task) {
+      this.tasks.sort((x, y) => x.done - y.done).reverse();
       db.collection("users")
         .doc(this.user.email)
         .collection(`todos`)
         .doc(task.id)
         .update({ done: task.done });
-      this.tasks.sort((x, y) => x.done - y.done).reverse();
     },
+
     deleteTodo(task) {
+      this.removeFromList(task.id);
       db.collection("users")
         .doc(this.user.email)
         .collection(`todos`)
         .doc(task.id)
-        .delete()
-        .then(() => {
-          this.removeFromList(task.id);
-        });
+        .delete();
     },
+
     renderList() {
+      
       db.collection("users")
         .doc(this.user.email)
         .collection("todos")
