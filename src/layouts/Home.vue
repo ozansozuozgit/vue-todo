@@ -34,7 +34,7 @@
     </v-row>
 
     <v-divider class="mb-4"></v-divider>
-    <div class="text-center" v-if="!tasks.length">
+    <div class="text-center" v-if="!tasks.length && !docEmpty">
       <v-progress-circular :size="50" color="amber" indeterminate></v-progress-circular>
     </div>
     <v-card v-if="tasks.length > 0">
@@ -84,6 +84,8 @@ export default {
     tasks: [],
     task: "",
     user: null,
+    docEmpty: false,
+    docRef: null,
   }),
   computed: {
     completedTasks() {
@@ -102,13 +104,9 @@ export default {
       if (this.task !== "") {
         this.tasks.push({ done: false, text: this.task });
 
-        db.collection("users")
-          .doc(this.user.email)
-          .collection("todos")
-          .add({ done: false, text: this.task })
-          .then((doc) => {
-            this.addToList(doc.id);
-          });
+        this.docRef.add({ done: false, text: this.task }).then((doc) => {
+          this.addToList(doc.id);
+        });
       }
     },
     addToList(doc_id) {
@@ -127,42 +125,51 @@ export default {
 
     update(task) {
       this.tasks.sort((x, y) => x.done - y.done).reverse();
-      db.collection("users")
-        .doc(this.user.email)
-        .collection(`todos`)
-        .doc(task.id)
-        .update({ done: task.done });
+      this.docRef.doc(task.id).update({ done: task.done });
     },
 
     deleteTodo(task) {
       this.removeFromList(task.id);
-      db.collection("users")
-        .doc(this.user.email)
-        .collection(`todos`)
-        .doc(task.id)
-        .delete();
+      this.docRef.doc(task.id).delete();
+      if (this.tasks.length === 0) this.docEmpty = true;
     },
 
     renderList() {
-      
-      db.collection("users")
-        .doc(this.user.email)
-        .collection("todos")
+      this.docRef
         .orderBy("done", "desc")
         .get()
-        .then((querySnapshot) => {
-          querySnapshot.forEach((doc) => {
-            this.tasks.push({
-              done: doc.data().done,
-              text: doc.data().text,
-              id: doc.id,
+        .then((snapshot) => {
+          if (!snapshot.empty) {
+            this.docEmpty = false;
+            snapshot.forEach((doc) => {
+              this.tasks.push({
+                done: doc.data().done,
+                text: doc.data().text,
+                id: doc.id,
+              });
             });
-          });
+          } else {
+            this.docEmpty = true;
+          }
         });
+
+      // .then((querySnapshot) => {
+      //   querySnapshot.forEach((doc) => {
+      //     this.tasks.push({
+      //       done: doc.data().done,
+      //       text: doc.data().text,
+      //       id: doc.id,
+      //     });
+      //   });
+      // });
     },
   },
   mounted() {
     this.user = firebase.auth().currentUser;
+    this.docRef = db
+      .collection("users")
+      .doc(this.user.email)
+      .collection("todos");
     this.renderList();
   },
 };
