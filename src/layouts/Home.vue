@@ -152,16 +152,6 @@ export default {
             this.docEmpty = true;
           }
         });
-
-      // .then((querySnapshot) => {
-      //   querySnapshot.forEach((doc) => {
-      //     this.tasks.push({
-      //       done: doc.data().done,
-      //       text: doc.data().text,
-      //       id: doc.id,
-      //     });
-      //   });
-      // });
     },
   },
   mounted() {
