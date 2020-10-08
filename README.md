@@ -1,4 +1,19 @@
-# test-vuetify
+# Vue Todo List with Firebase
+Todo list with all CRUD capabilities utilizing Firebase as a database to store users and their todos.
+
+## Live Version
+Website is hosted on [Firebase](https://todo-vue-83560.firebaseapp.com/)
+
+
+## Purpose of This Project
+To use the following concepts:
+* Vue.js
+* Vuetify
+* Firebase
+* CRUD
+* vue-router
+* Field checking
+
 
 ## Project setup
 ```
@@ -10,15 +25,3 @@ npm install
 npm run serve
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
